@@ -33,6 +33,10 @@ class ViewController: UIViewController, UITableViewDataSource, UITableViewDelega
         
         ref = Database.database().reference()
         
+      
+
+        
+        
         readFromFirebase()
         
         let student1 = Students(name: "billy", age: 23)

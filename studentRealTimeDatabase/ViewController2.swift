@@ -11,9 +11,13 @@ import FirebaseDatabase
 
 class ViewController2: UIViewController, UITableViewDataSource, UITableViewDelegate {
     
+   var ref: DatabaseReference!
+
    var listOfStudents = [Students]()
     
+    @IBOutlet weak var nameTextField: UITextField!
     
+    @IBOutlet weak var ageTextField: UITextField!
     @IBOutlet weak var tableView2: UITableView!
     
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
@@ -22,7 +26,8 @@ class ViewController2: UIViewController, UITableViewDataSource, UITableViewDeleg
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = tableView2.dequeueReusableCell(withIdentifier: "freakyCell")
-        cell?.textLabel?.text = listOfStudents[indexPath.row]
+        cell?.textLabel?.text = listOfStudents[indexPath.row].name
+        cell?.detailTextLabel?.text = String(listOfStudents[indexPath.row].age)
         return cell!
     }
     
@@ -32,42 +37,45 @@ class ViewController2: UIViewController, UITableViewDataSource, UITableViewDeleg
     override func viewDidLoad() {
         super.viewDidLoad()
         tableView2.dataSource = self
-               tableView2.delegate = self
+        tableView2.delegate = self
+        ref = Database.database().reference()
         
-
+        let bobbyBoy = Students(name: "billyBob", age: 12)
         
-        func readFromFirebase(){
-         
-            
-//            ref.child("students").observe(.childAdded, with: { (snapshot) in
-//                       // snapshot is a dictionary with a key and a value
-//                        
-//                        // this gets each name from each snapshot
-//                        let n = snapshot.value as! String
-//                        // adds the name to an array if the name is not already there
-//                        if !self.names.contains(n){
-//                            self.names.append(n)
-//                            print(n)
-//                        }
-//                    })
-//            
-//            //called after .childAdded is done
-//                    ref.child("students").observeSingleEvent(of: .value, with: { snapshot in
-//                            print("--inital load has completed and the last user was read--")
-//                        print(self.names)
-//                        self.tableView1.reloadData()
-//                        })
-            
-            
-
-
-        }
+        
+        ref.child("students2").observe(.childAdded, with: { (snapshot) in
+                   // snapshot is a dictionary with a key and a dictionary as a value
+                    // this gets the dictionary from each snapshot
+                    let dict = snapshot.value as! [String:Any]
+                   
+                    // building a Student object from the dictionary
+                    let s = Students(dict: dict)
+                    // adding the student object to the Student array
+                    self.listOfStudents.append(s)
+                     self.tableView2.reloadData()
+        // should only add the student if the student isn’t already in the array
+        // good place to update the tableview also
+                    
+                })
 
         
-        // Do any additional setup after loading the view.
+        
+        
+        
+        
+    }
+      
+    
+    @IBAction func button2(_ sender: Any) {
+        var bob = nameTextField.text!
+        var bill = ageTextField.text!
+        
+        var new = Students(name: bob, age: Int(bill) ?? 0)
+        new.saveToFireBase()
+        self.tableView2.reloadData()
     }
     
-
+   
     /*
     // MARK: - Navigation
 
